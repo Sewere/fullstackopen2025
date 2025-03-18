@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 const App = () => {
-  // tallenna napit omaan tilaansa
   const [good, setGood] = useState(0);
   const [neutral, setNeutral] = useState(0);
   const [bad, setBad] = useState(0);
@@ -50,21 +49,55 @@ const App = () => {
     setAverage(avg);
     setGoodPercent(goods);
   };
-
   return (
     <div>
       <Display value={"Give feedback"} headline={true} />
       <Button text={"Good"} onClick={() => setVotes(1)} />
       <Button text={"Neutral"} onClick={() => setVotes(0)} />
       <Button text={"Bad"} onClick={() => setVotes(-1)} />
-      <Display value={"Statistics"} headline={true} />
-      <Display value={"Good " + good} headline={false} />
-      <Display value={"Neutral " + neutral} headline={false} />
-      <Display value={"Bad " + bad} headline={false} />
-      <Display value={"All " + allVotes.length} headline={false} />
-      <Display value={"Average " + average} headline={false} />
-      <Display value={"Positive " + goodPercent + " %"} headline={false} />
+      <Statistics
+        good={good}
+        neutral={neutral}
+        bad={bad}
+        allVotes={allVotes}
+        average={average}
+        goodPercent={goodPercent}
+      />
     </div>
+  );
+};
+
+const Statistics = (props) => {
+  const { good, neutral, bad, allVotes, average, goodPercent } = props;
+  console.log(props);
+  if (allVotes.length === 0) {
+    return <p>No stats yet</p>;
+  }
+  return (
+    <div>
+      <Display value={"Statistics"} headline={true} />
+      <StatisticsLine text={"Good"} value={good} />
+      <StatisticsLine text={"Neutral"} value={neutral} />
+      <StatisticsLine text={"Bad"} value={bad} />
+      <StatisticsLine text={"All"} value={allVotes.length} />
+      <StatisticsLine text={"Average"} value={average} />
+      <StatisticsLine text={"Positive"} value={goodPercent} sign={"%"} />
+    </div>
+  );
+};
+
+const StatisticsLine = (props) => {
+  if (props.sign) {
+    return (
+      <p>
+        {props.text} {props.value} {props.sign}
+      </p>
+    );
+  }
+  return (
+    <p>
+      {props.text} {props.value}
+    </p>
   );
 };
 
