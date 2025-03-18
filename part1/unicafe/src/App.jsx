@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./App.css";
 
 const App = () => {
   const [good, setGood] = useState(0);
@@ -76,12 +77,16 @@ const Statistics = (props) => {
   return (
     <div>
       <Display value={"Statistics"} headline={true} />
-      <StatisticsLine text={"Good"} value={good} />
-      <StatisticsLine text={"Neutral"} value={neutral} />
-      <StatisticsLine text={"Bad"} value={bad} />
-      <StatisticsLine text={"All"} value={allVotes.length} />
-      <StatisticsLine text={"Average"} value={average} />
-      <StatisticsLine text={"Positive"} value={goodPercent} sign={"%"} />
+      <table>
+        <tbody>
+          <StatisticsLine text={"Good"} value={good} />
+          <StatisticsLine text={"Neutral"} value={neutral} />
+          <StatisticsLine text={"Bad"} value={bad} />
+          <StatisticsLine text={"All"} value={allVotes.length} />
+          <StatisticsLine text={"Average"} value={average} />
+          <StatisticsLine text={"Positive"} value={goodPercent} sign={"%"} />
+        </tbody>
+      </table>
     </div>
   );
 };
@@ -89,20 +94,24 @@ const Statistics = (props) => {
 const StatisticsLine = (props) => {
   if (props.sign) {
     return (
-      <p>
-        {props.text} {props.value} {props.sign}
-      </p>
+      <tr>
+        <th>{props.text}</th>
+        <th>
+          {props.value} {props.sign}
+        </th>
+      </tr>
     );
   }
   return (
-    <p>
-      {props.text} {props.value}
-    </p>
+    <tr>
+      <th>{props.text}</th>
+      <th>{props.value}</th>
+    </tr>
   );
 };
 
 const Display = (props) => {
-  if (props.headline == true) {
+  if (props.headline) {
     return <h1>{props.value}</h1>;
   }
   return <p>{props.value}</p>;
