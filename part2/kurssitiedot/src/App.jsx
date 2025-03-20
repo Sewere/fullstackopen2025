@@ -55,9 +55,14 @@ const Part = ({ part }) => {
 };
 
 function Total({ parts }) {
-  let sum = 0;
-  parts.map((part) => (sum += part.exercises));
-  return <p>Number of exercises {sum}</p>;
+  const numberList = parts.map((part) => part.exercises);
+  const summa = numberList.reduce((total, value) => {
+    console.log("Total:", total, "Value to add:", value);
+    let add = total + value;
+    console.log("Total after adding:", add);
+    return add;
+  });
+  return <p>Number of exercises {summa}</p>;
 }
 
 const Header = ({ name }) => <h1>{name}</h1>;
