@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import personService from "./services/persons";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -9,7 +9,7 @@ const App = () => {
 
   useEffect(() => {
     console.log("effect");
-    axios.get("http://localhost:3001/persons").then((response) => {
+    personService.getAll().then((response) => {
       console.log("promise fulfilled");
       setPersons(response.data);
     });
@@ -31,7 +31,13 @@ const App = () => {
       name: newName,
       number: newNumber,
     };
-    setPersons(persons.concat(nameObject));
+    //Palvelin huolehtii ID kentästä
+    personService.create(nameObject).then((response) => {
+      console.log(response);
+      setPersons(persons.concat(response.data));
+      setNewName("");
+      setNewNumber("");
+    });
   };
 
   const handleNameChange = (event) => {
@@ -52,6 +58,19 @@ const App = () => {
     person.name.includes(searchName)
   );
 
+  const destroyPerson = (id, name) => {
+    if (window.confirm(`Do you wanna delete person with name ${name}`)) {
+      console.log(`Deleting person with id ${id}`);
+      personService.destroy(id).then((returnedPerson) => {
+        console.log(`Deleted ${returnedPerson.name}`);
+        setPersons(persons.filter((person) => person.id !== returnedPerson.id));
+      });
+    } else {
+      console.log("Canceling delete");
+    }
+    //alert(`Do you wanna delete person with name ${name}`);
+  };
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -64,17 +83,8 @@ const App = () => {
       />
       <h2>Numbers</h2>
       <Filter searchName={searchName} handleSearch={handleSearch} />
-      <Persons namesToShow={namesToShow} />
+      <Persons namesToShow={namesToShow} destroyPerson={destroyPerson} />
     </div>
-  );
-};
-
-const Filter = ({ searchName, handleSearch }) => {
-  //console.log("what??", searchName, handleSearch);
-  return (
-    <p>
-      filter names: <input value={searchName} onChange={handleSearch} />
-    </p>
   );
 };
 
@@ -98,15 +108,29 @@ const PersonForm = (props) => {
   );
 };
 
-const Persons = ({ namesToShow }) => {
+const Persons = ({ namesToShow, destroyPerson }) => {
   return (
     <ul>
       {namesToShow.map((person) => (
         <li key={person.name}>
           {person.name} {person.number}
+          <button
+            id="deleteButton"
+            onClick={() => destroyPerson(person.id, person.name)}
+          >
+            Delete this person
+          </button>
         </li>
       ))}
     </ul>
+  );
+};
+
+const Filter = ({ searchName, handleSearch }) => {
+  return (
+    <p>
+      filter names: <input value={searchName} onChange={handleSearch} />
+    </p>
   );
 };
 
