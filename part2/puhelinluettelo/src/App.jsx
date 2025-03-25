@@ -6,6 +6,8 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [searchName, setSearchName] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [wantedError, setWantedError] = useState(true);
 
   useEffect(() => {
     //console.log("effect");
@@ -15,6 +17,14 @@ const App = () => {
     });
   }, []);
   //console.log("render", persons.length, "persons");
+
+  const showMessage = (message, error) => {
+    setWantedError(error);
+    setErrorMessage(message);
+    setTimeout(() => {
+      setErrorMessage(null);
+    }, 15000);
+  };
 
   const addName = (event) => {
     event.preventDefault();
@@ -33,16 +43,29 @@ const App = () => {
           ...alreadyExists,
           number: newNumber,
         };
-        personService.update(newnameObject).then((response) => {
-          console.log(response.data);
-          setPersons(
-            persons.map((person) =>
-              person.id !== newnameObject.id ? person : response.data
-            )
-          );
-          setNewName("");
-          setNewNumber("");
-        });
+        personService
+          .update(newnameObject)
+          .then((response) => {
+            console.log(response.data);
+            showMessage(`Changed ${newName}'s number to ${newNumber}.`, false);
+            setPersons(
+              persons.map((person) =>
+                person.id !== newnameObject.id ? person : response.data
+              )
+            );
+            setNewName("");
+            setNewNumber("");
+          })
+          .catch((error) => {
+            console.log(error);
+            showMessage(
+              `Person ${newnameObject.name} was already removed from server.`,
+              true
+            );
+            setPersons(
+              persons.filter((person) => person.id !== newnameObject.id)
+            );
+          });
       }
       //alert(`${newName} already exists you fool!`);
       return;
@@ -54,6 +77,7 @@ const App = () => {
     //Palvelin huolehtii ID kentästä
     personService.create(nameObject).then((response) => {
       //console.log(response);
+      showMessage(`Created person called ${newName}.`, false);
       setPersons(persons.concat(response.data));
       setNewName("");
       setNewNumber("");
@@ -65,6 +89,7 @@ const App = () => {
       console.log(`Deleting person with id ${id}`);
       personService.destroy(id).then((returnedPerson) => {
         console.log(`Deleted ${returnedPerson.name}`);
+        showMessage(`Deleted ${returnedPerson.name}.`, false);
         setPersons(persons.filter((person) => person.id !== returnedPerson.id));
       });
     } else {
@@ -92,7 +117,8 @@ const App = () => {
 
   return (
     <div>
-      <h2>Phonebook</h2>
+      <h1>Phonebook</h1>
+      <Notification error={wantedError} message={errorMessage} />
       <PersonForm
         addName={addName}
         newName={newName}
@@ -100,11 +126,23 @@ const App = () => {
         handleNameChange={handleNameChange}
         handleNumberChange={handleNumberChange}
       />
-      <h2>Numbers</h2>
+      <h2>Numberlist</h2>
       <Filter searchName={searchName} handleSearch={handleSearch} />
       <Persons namesToShow={namesToShow} destroyPerson={destroyPerson} />
     </div>
   );
+};
+
+const Notification = (props) => {
+  if (props.message === null) {
+    return null;
+  }
+  console.log(props.error);
+  if (props.error === true) {
+    return <div className="error">{props.message}</div>;
+  } else {
+    return <div className="success">{props.message}</div>;
+  }
 };
 
 const PersonForm = (props) => {
@@ -131,7 +169,7 @@ const Persons = ({ namesToShow, destroyPerson }) => {
   return (
     <ul>
       {namesToShow.map((person) => (
-        <li key={person.name}>
+        <li className="person" key={person.name}>
           {person.name} {person.number}
           <button
             id="deleteButton"
