@@ -14,8 +14,8 @@ const destroy = (id) => {
     return req.then(response => response.data)
   }
 
-const update = (id, newObject) => {
-  return axios.put(`${baseUrl}/${id}`, newObject)
+const update = (newObject) => {
+  return axios.put(`${baseUrl}/${newObject.id}`, newObject)
 }
 
 export default { 
